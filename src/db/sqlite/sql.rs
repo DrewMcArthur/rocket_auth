@@ -2,6 +2,7 @@ pub(crate) const CREATE_TABLE: &str = "
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
     email TEXT UNIQUE,
+    username TEXT UNIQUE,
     password TEXT NOT NULL,
     is_admin BOOL DEFAULT 0
     -- failed_login_attempts INTEGER DEFAULT 0

@@ -2,6 +2,7 @@ pub(crate) const CREATE_TABLE: &str = "
 CREATE TABLE IF NOT EXISTS users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR (254) UNIQUE NOT NULL,
+    username VARCHAR (254) UNIQUE NOT NULL,
 	password VARCHAR ( 255 ) NOT NULL,
     is_admin BOOLEAN DEFAULT FALSE
 );

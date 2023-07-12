@@ -106,11 +106,7 @@ impl DBConnection for Mutex<rusqlite::Connection> {
     async fn get_user_by_username(&self, username: &str) -> Result<User> {
         let conn = self.lock().await;
         let user = block_in_place(|| {
-            conn.query_row(
-                SELECT_BY_USERNAME, //
-                params![username],
-                |row| row.try_into(),
-            )
+            conn.query_row(SELECT_BY_USERNAME, params![username], |row| row.try_into())
         })?;
         Ok(user)
     }
