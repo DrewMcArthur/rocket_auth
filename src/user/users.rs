@@ -165,7 +165,7 @@ impl Users {
         } else if login.username.is_some() {
             let username = login.username.as_ref().unwrap();
             self.conn
-                .get_user_by_username(&username)
+                .get_user_by_username(username)
                 .await
                 .map_err(|_| Error::UsernameDoesNotExist(username.clone()))?
         } else {

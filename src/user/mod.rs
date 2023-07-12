@@ -61,10 +61,7 @@ impl Users {
     async fn signup<'a>(&self, form: &Signup) {
         form.validate()?;
 
-        let email = match &form.email {
-            Some(email) => Some(email.to_lowercase()),
-            None => None,
-        };
+        let email = form.email.as_ref().map(|email| email.to_lowercase());
         let username = form.username.as_deref();
         let password = &form.password;
 
