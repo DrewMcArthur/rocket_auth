@@ -59,4 +59,12 @@ impl DBConnection for PgPool {
             .await?;
         Ok(user)
     }
+
+    async fn get_user_by_username(&self, username: &str) -> Result<User> {
+        let user = query_as(SELECT_BY_USERNAME)
+            .bind(username)
+            .fetch_one(self)
+            .await?;
+        Ok(user)
+    }
 }

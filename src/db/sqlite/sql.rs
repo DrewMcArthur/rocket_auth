@@ -29,6 +29,10 @@ pub(crate) const SELECT_BY_EMAIL: &str = "
 SELECT * FROM users WHERE email = ?1;
 ";
 
+pub(crate) const SELECT_BY_USERNAME: &str = "
+SELECT * FROM users WHERE username = ?1;
+";
+
 pub(crate) const REMOVE_BY_ID: &str = "
 DELETE FROM users WHERE id =?1;
 ";

@@ -228,7 +228,7 @@ impl Users {
     /// # use rocket_auth::{Error, Users};
     /// #[post("/create_admin/<email>/<password>")]
     /// async fn create_admin(email: String, password: String, users: &State<Users>) -> Result<String, Error> {
-    ///     users.create_user(&email, &password, true).await?;
+    ///     users.create_user(Some(&email), None, &password, true).await?;
     ///     Ok("User created successfully".into())
     /// }
     /// # fn main() {}

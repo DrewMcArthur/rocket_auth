@@ -44,6 +44,13 @@ impl DBConnection for Client {
         let user = self.query_one(sql::SELECT_BY_EMAIL, &[&email]).await?;
         user.try_into()
     }
+
+    async fn get_user_by_username(&self, username: &str) -> Result<User> {
+        let user = self
+            .query_one(sql::SELECT_BY_USERNAME, &[&username])
+            .await?;
+        user.try_into()
+    }
 }
 
 impl TryFrom<tokio_postgres::Row> for User {

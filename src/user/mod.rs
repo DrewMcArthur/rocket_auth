@@ -65,16 +65,11 @@ impl Users {
             Some(email) => Some(email.to_lowercase()),
             None => None,
         };
-        let username = form.username.as_ref();
+        let username = form.username.as_deref();
         let password = &form.password;
 
         let result = self
-            .create_user(
-                email.as_ref().map(|s| s.as_str()),
-                username.map(|s| s.as_str()),
-                password,
-                false,
-            )
+            .create_user(email.as_deref(), username, password, false)
             .await;
 
         match result {

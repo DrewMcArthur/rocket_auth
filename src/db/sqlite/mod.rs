@@ -95,6 +95,18 @@ impl DBConnection for Mutex<rusqlite::Connection> {
         })?;
         Ok(user)
     }
+
+    async fn get_user_by_username(&self, username: &str) -> Result<User> {
+        let conn = self.lock().await;
+        let user = block_in_place(|| {
+            conn.query_row(
+                SELECT_BY_USERNAME, //
+                params![username],
+                |row| row.try_into(),
+            )
+        })?;
+        Ok(user)
+    }
 }
 
 #[cfg(feature = "sqlx-sqlite")]
@@ -168,7 +180,16 @@ impl DBConnection for Mutex<SqliteConnection> {
             .await?;
         Ok(user)
     }
+    async fn get_user_by_username(&self, username: &str) -> Result<User> {
+        let mut db = self.lock().await;
+        let user = query_as(SELECT_BY_USERNAME)
+            .bind(username)
+            .fetch_one(&mut *db)
+            .await?;
+        Ok(user)
+    }
 }
+
 #[cfg(feature = "sqlx-sqlite")]
 #[rocket::async_trait]
 impl DBConnection for SqlitePool {
@@ -227,6 +248,14 @@ impl DBConnection for SqlitePool {
     }
     async fn get_user_by_email(&self, email: &str) -> Result<User> {
         let user = query_as(SELECT_BY_EMAIL).bind(email).fetch_one(self).await;
+        println!("user: {:?}", user);
+        Ok(user?)
+    }
+    async fn get_user_by_username(&self, username: &str) -> Result<User> {
+        let user = query_as(SELECT_BY_USERNAME)
+            .bind(username)
+            .fetch_one(self)
+            .await;
         println!("user: {:?}", user);
         Ok(user?)
     }
