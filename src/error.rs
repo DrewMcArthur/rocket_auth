@@ -27,9 +27,11 @@ pub enum Error {
 
     #[error("UnauthenticatedError: The operation failed because the client is not authenticated.")]
     UnauthenticatedError,
+
     /// This error occurs when a user tries to log in, but their account doesn't exist.
     #[error("The email \"{0}\" is not registered. Try signing up first.")]
     EmailDoesNotExist(String),
+
     /// This error is thrown when a user tries to sign up with an email that already exists.
     #[error("That email address already exists. Try logging in.")]
     EmailAlreadyExists,
@@ -54,6 +56,7 @@ pub enum Error {
     #[cfg(feature = "sqlx")]
     #[error("SqlxError: {0}")]
     SqlxError(#[from] sqlx::Error),
+
     /// A wrapper around [`argon2::Error`].
     #[error("Argon2ParsingError: {0}")]
     Argon2ParsingError(#[from] argon2::Error),
