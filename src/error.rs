@@ -94,9 +94,7 @@ impl Error {
             | UserNotFoundError => format!("{}", self),
             FormValidationErrors(source) => {
                 source
-                    .field_errors()
-                    .into_iter()
-                    .map(|(_, error)| error)
+                    .field_errors().into_values()
                     .map(IntoIterator::into_iter)
                     .map(|errs| {
                         errs //
@@ -106,7 +104,7 @@ impl Error {
                     .fold(String::new(), |a, b| a + &b)
             }
             #[cfg(debug_assertions)]
-            e => return format!("{}", e),
+            e => format!("{}", e),
             #[allow(unreachable_patterns)]
             _ => "undefined".into(),
         }
