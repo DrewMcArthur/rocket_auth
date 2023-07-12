@@ -291,10 +291,10 @@ impl<'a> Auth<'a> {
     /// It is intended to be used primarily
     /// with the `?` operator.
     /// ```
-    /// # fn func(auth: rocket_auth::Auth) -> Result<(), rocket_auth::Error> {
-    /// auth.get_session()?;
-    /// # Ok(())
-    /// # }
+    /// fn func(auth: rocket_auth::Auth) -> Result<(), rocket_auth::Error> {
+    ///   auth.get_session()?;
+    ///   Ok(())
+    /// }
     /// ```
     pub fn get_session(&self) -> Result<&Session> {
         let session = self.session.as_ref().ok_or(Error::UnauthenticatedError)?;
@@ -308,7 +308,7 @@ impl<'a> Auth<'a> {
     #[throws(Error)]
     pub async fn compare_password(&self, password: &str) -> bool {
         if self.is_auth() {
-            let session = self.get_session()?; 
+            let session = self.get_session()?;
             let user: User = self.users.get_by_id(session.id).await?;
             user.compare_password(password)?
         } else {
