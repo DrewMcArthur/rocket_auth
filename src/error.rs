@@ -51,7 +51,7 @@ pub enum Error {
     FormValidationErrors(#[from] validator::ValidationErrors),
 
     /// A wrapper around [`sqlx::Error`].
-    #[cfg(any(feature = "sqlx"))]
+    #[cfg(feature = "sqlx")]
     #[error("SqlxError: {0}")]
     SqlxError(#[from] sqlx::Error),
     /// A wrapper around [`argon2::Error`].
