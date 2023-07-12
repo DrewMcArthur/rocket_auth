@@ -12,9 +12,16 @@ impl DBConnection for MySqlPool {
         query(CREATE_TABLE).execute(self).await?;
         Ok(())
     }
-    async fn create_user(&self, email: &str, hash: &str, is_admin: bool) -> Result<()> {
+    async fn create_user(
+        &self,
+        email: Option<&str>,
+        username: Option<&str>,
+        hash: &str,
+        is_admin: bool,
+    ) -> Result<()> {
         query(INSERT_USER)
             .bind(email)
+            .bind(username)
             .bind(hash)
             .bind(is_admin)
             .execute(self)
@@ -48,6 +55,13 @@ impl DBConnection for MySqlPool {
     async fn get_user_by_email(&self, email: &str) -> Result<User> {
         let user = query_as(SELECT_BY_EMAIL)
             .bind(email)
+            .fetch_one(self)
+            .await?;
+        Ok(user)
+    }
+    async fn get_user_by_username(&self, username: &str) -> Result<User> {
+        let user = query_as(SELECT_BY_USERNAME)
+            .bind(username)
             .fetch_one(self)
             .await?;
         Ok(user)

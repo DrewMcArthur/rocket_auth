@@ -154,6 +154,27 @@ impl Users {
         users
     }
 
+    #[throws(Error)]
+    pub async fn get_by_login(&self, login: &Login) -> User {
+        if login.email.is_some() {
+            let email = login.email.as_ref().unwrap();
+            self.conn
+                .get_user_by_email(&email.to_lowercase())
+                .await
+                .map_err(|_| Error::EmailDoesNotExist(email.clone()))?
+        } else if login.username.is_some() {
+            let username = login.username.as_ref().unwrap();
+            self.conn
+                .get_user_by_username(&username)
+                .await
+                .map_err(|_| Error::UsernameDoesNotExist(username.clone()))?
+        } else {
+            throw!(Error::BadRequest(
+                "Either email or username is required; neither were provided.".to_string()
+            ));
+        }
+    }
+
     /// It queries a user by their email.
     /// ```
     /// # use rocket::{State, get};
@@ -167,6 +188,21 @@ impl Users {
     #[throws(Error)]
     pub async fn get_by_email(&self, email: &str) -> User {
         self.conn.get_user_by_email(email).await?
+    }
+
+    /// It queries a user by their username.
+    /// ```
+    /// # use rocket::{State, get};
+    /// # use rocket_auth::{Error, Users};
+    /// #[get("/user-information/<username>")]
+    /// async fn user_information(username: String, users: &State<Users>) -> Result<String, Error> {
+    ///     let user = users.get_by_email(&username).await?;
+    ///     Ok(format!("{:?}", user))
+    /// }
+    /// ```
+    #[throws(Error)]
+    pub async fn get_by_username(&self, username: &str) -> User {
+        self.conn.get_user_by_username(username).await?
     }
 
     /// It queries a user by their email.
@@ -198,12 +234,20 @@ impl Users {
     /// # fn main() {}
     /// ```
     #[throws(Error)]
-    pub async fn create_user(&self, email: &str, password: &str, is_admin: bool) {
+    pub async fn create_user(
+        &self,
+        email: Option<&str>,
+        username: Option<&str>,
+        password: &str,
+        is_admin: bool,
+    ) {
         let password = password.as_bytes();
         let salt = rand_string(30);
         let config = argon2::Config::default();
         let hash = argon2::hash_encoded(password, salt.as_bytes(), &config).unwrap();
-        self.conn.create_user(email, &hash, is_admin).await?;
+        self.conn
+            .create_user(email, username, &hash, is_admin)
+            .await?;
     }
 
     /// Deletes a user from de database. Note that this method won't delete the session.

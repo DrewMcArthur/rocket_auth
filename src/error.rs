@@ -3,6 +3,10 @@ use std::*;
 #[non_exhaustive]
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
+    /// This error occurs if the request was malformed
+    #[error("Bad Request: {0}")]
+    BadRequest(String),
+
     /// This error occurs when attempting to create a user with an invalid email address.
     #[error("That is not a valid email address.")]
     InvalidEmailAddressError,
@@ -29,6 +33,11 @@ pub enum Error {
     /// This error is thrown when a user tries to sign up with an email that already exists.
     #[error("That email address already exists. Try logging in.")]
     EmailAlreadyExists,
+
+    /// This error occurs when a given username is not found in the DB
+    #[error("The username \"{0}\" was not found. Try signing up first.")]
+    UsernameDoesNotExist(String),
+
     /// This error occurs when the user does exist, but their password was incorrect.
     #[error("Incorrect email or password")]
     UnauthorizedError,

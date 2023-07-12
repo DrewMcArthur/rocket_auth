@@ -12,9 +12,16 @@ impl DBConnection for PgPool {
         query(CREATE_TABLE).execute(self).await?;
         Ok(())
     }
-    async fn create_user(&self, email: &str, hash: &str, is_admin: bool) -> Result<()> {
+    async fn create_user(
+        &self,
+        email: Option<&str>,
+        username: Option<&str>,
+        hash: &str,
+        is_admin: bool,
+    ) -> Result<()> {
         query(INSERT_USER)
             .bind(email)
+            .bind(username)
             .bind(hash)
             .bind(is_admin)
             .execute(self)

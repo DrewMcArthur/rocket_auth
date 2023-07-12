@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
 ";
 
 pub(crate) const INSERT_USER: &str = "
-INSERT INTO users (email, password, is_admin) VALUES (?, ?, ?);
+INSERT INTO users (email, username, password, is_admin) VALUES (?, ?, ?, ?);
 ";
 
 pub(crate) const UPDATE_USER: &str = "
@@ -26,6 +26,10 @@ SELECT * FROM users WHERE id = ?;
 
 pub(crate) const SELECT_BY_EMAIL: &str = "
 SELECT * FROM users WHERE email = ?;
+";
+
+pub(crate) const SELECT_BY_USERNAME: &str = "
+SELECT * FROM users WHERE username = ?;
 ";
 
 pub(crate) const REMOVE_BY_ID: &str = "

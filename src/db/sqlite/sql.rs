@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 );";
 
 pub(crate) const INSERT_USER: &str = "
-INSERT INTO users (email, password, is_admin) VALUES (?1, ?2, ?3);
+INSERT INTO users (email, username, password, is_admin) VALUES (?1, ?2, ?3, ?4);
 ";
 
 pub(crate) const UPDATE_USER: &str = "

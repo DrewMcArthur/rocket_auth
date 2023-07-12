@@ -8,8 +8,14 @@ impl DBConnection for Client {
         self.execute(sql::CREATE_TABLE, &[]).await?;
         Ok(())
     }
-    async fn create_user(&self, email: &str, hash: &str, is_admin: bool) -> Result<(), Error> {
-        self.execute(sql::INSERT_USER, &[&email, &hash, &is_admin])
+    async fn create_user(
+        &self,
+        email: Option<&str>,
+        username: Option<&str>,
+        hash: &str,
+        is_admin: bool,
+    ) -> Result<(), Error> {
+        self.execute(sql::INSERT_USER, &[&email, &username, &hash, &is_admin])
             .await?;
         Ok(())
     }

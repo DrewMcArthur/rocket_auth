@@ -4,7 +4,8 @@ use crate::prelude::*;
 #[derive(FromForm, Deserialize, Clone, Hash, PartialEq, Eq, Validate)]
 pub struct Login {
     #[validate(email)]
-    pub email: String,
+    pub email: Option<String>,
+    pub username: Option<String>,
     pub(crate) password: String,
 }
 
@@ -12,7 +13,8 @@ pub struct Login {
 #[derive(FromForm, Deserialize, Clone, PartialEq, Eq, Hash, Validate)]
 pub struct Signup {
     #[validate(email)]
-    pub email: String,
+    pub email: Option<String>,
+    pub username: Option<String>,
     #[validate(
         custom = "is_long",
         custom = "has_number",
@@ -25,8 +27,8 @@ impl Debug for Signup {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Signup {{ email: {:?}, password: \"*****\" }}",
-            self.email
+            "Signup {{ email: {:?}, username: {:?}, password: \"*****\" }}",
+            self.email, self.username
         )
     }
 }
@@ -34,8 +36,8 @@ impl Debug for Login {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Signup {{ email: {:?}, password: \"*****\" }}",
-            self.email
+            "Login {{ email: {:?}, username: {:?}, password: \"*****\" }}",
+            self.email, self.username
         )
     }
 }
@@ -44,6 +46,7 @@ impl From<Signup> for Login {
     fn from(form: Signup) -> Login {
         Login {
             email: form.email,
+            username: form.username,
             password: form.password,
         }
     }
@@ -53,6 +56,7 @@ impl From<Login> for Signup {
     fn from(form: Login) -> Signup {
         Self {
             email: form.email,
+            username: form.username,
             password: form.password,
         }
     }
@@ -62,6 +66,7 @@ impl<T: Deref<Target = Signup>> From<T> for Login {
     fn from(form: T) -> Login {
         Login {
             email: form.email.clone(),
+            username: form.username.clone(),
             password: form.password.clone(),
         }
     }
@@ -76,9 +81,9 @@ pub(crate) fn is_secure(password: &str) {
 
 #[throws(ValidationError)]
 fn is_long(password: &str) {
-    if password.len() < 8 {
+    if password.len() < 12 {
         throw!(ValidationError::new(
-            "The password must be at least 8 characters long.\n"
+            "The password must be at least 12 characters long.\n"
         ));
     }
 }
