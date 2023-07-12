@@ -94,7 +94,8 @@ impl Error {
             | UserNotFoundError => format!("{}", self),
             FormValidationErrors(source) => {
                 source
-                    .field_errors().into_values()
+                    .field_errors()
+                    .into_values()
                     .map(IntoIterator::into_iter)
                     .map(|errs| {
                         errs //

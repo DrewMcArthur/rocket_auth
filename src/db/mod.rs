@@ -1,9 +1,9 @@
 #[cfg(feature = "sqlx-postgres")]
 mod postgres;
 
-#[cfg(feature="sqlx-mysql")]
+#[cfg(feature = "sqlx-mysql")]
 mod mysql;
-#[cfg(any(feature="sqlx-sqlite", feature="rusqlite"))]
+#[cfg(any(feature = "sqlx-sqlite", feature = "rusqlite"))]
 mod sqlite;
 
 #[cfg(feature = "tokio-postgres")]
@@ -47,7 +47,6 @@ impl<T: DBConnection> DBConnection for std::sync::Arc<T> {
     }
 }
 
-
 #[rocket::async_trait]
 impl<T: DBConnection> DBConnection for tokio::sync::Mutex<T> {
     async fn init(&self) -> Result<()> {
@@ -72,4 +71,3 @@ impl<T: DBConnection> DBConnection for tokio::sync::Mutex<T> {
         self.lock().await.get_user_by_email(email).await
     }
 }
-
