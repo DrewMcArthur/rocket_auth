@@ -12,10 +12,10 @@ impl User {
     /// In case the user is authenticated,
     /// you can change it more easily with [`change_password`](`super::auth::Auth::change_password`).
     /// This function will fail in case the password is not secure enough.
-    /// 
+    ///
     /// ```rust
     /// # use rocket::{State, post};
-    /// # use rocket_auth::{Error, Users};
+    /// # use rocket_auth::{Error, Users, User};
     /// #[post("/reset-password/<new_password>")]
     /// async fn reset_password(mut user: User, users: &State<Users>, new_password: String) -> Result<(), Error> {
     ///     user.set_password(&new_password);
@@ -144,8 +144,8 @@ impl<'r> FromRequest<'r> for AdminUser {
     }
 }
 
-use std::ops::*;
 use argon2::verify_encoded;
+use std::ops::*;
 
 impl Deref for AdminUser {
     type Target = User;

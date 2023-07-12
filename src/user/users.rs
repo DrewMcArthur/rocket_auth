@@ -31,11 +31,12 @@ impl Users {
         users.create_table().await?;
         users
     }
+
     /// Initializes the user table in the database. It won't drop the table if it already exists.
     /// It is necessary to call it explicitly when casting the `Users` struct from an already
     /// established database connection and if the table hasn't been created yet. If the table
     /// already exists then this step is not necessary.
-    /// ```rust,
+    /// ```should_fail
     /// # use sqlx::{sqlite::SqlitePool, Connection};
     /// # use rocket_auth::{Users, Error};
     /// # #[tokio::main]
@@ -44,7 +45,7 @@ impl Users {
     /// let mut users: Users = conn.into();
     /// users.open_redis("redis://127.0.0.1/")?;
     /// users.create_table().await?;
-    /// # Ok(()) }
+    /// #  Ok(()) }
     /// ```
     #[throws(Error)]
     pub async fn create_table(&self) {
@@ -52,7 +53,7 @@ impl Users {
     }
     /// Opens a redis connection. It allows for sessions to be stored persistently across
     /// different launches. Note that persistent sessions also require a `secret_key` to be set in the [Rocket.toml](https://rocket.rs/v0.5-rc/guide/configuration/#configuration) configuration file.
-    /// ```rust,
+    /// ```should_fail
     /// # use rocket_auth::{Users, Error};
     /// # #[tokio::main]
     /// # async fn main() -> Result<(), Error> {
@@ -159,11 +160,9 @@ impl Users {
     /// # use rocket_auth::{Error, Users};
     /// #[get("/user-information/<email>")]
     /// async fn user_information(email: String, users: &State<Users>) -> Result<String, Error> {
-    ///        
     ///     let user = users.get_by_email(&email).await?;
     ///     Ok(format!("{:?}", user))
     /// }
-    /// # fn main() {}
     /// ```
     #[throws(Error)]
     pub async fn get_by_email(&self, email: &str) -> User {
@@ -210,10 +209,13 @@ impl Users {
     /// Deletes a user from de database. Note that this method won't delete the session.
     /// To do that use [`Auth::delete`](crate::Auth::delete).
     /// ```
+    /// # use rocket::{State, get};
+    /// # use rocket_auth::{Users, Error};
+    ///
     /// #[get("/delete_user/<id>")]
-    /// async fn delete_user(id: i32, users: &State<Users>) -> Result<String> {
+    /// async fn delete_user(id: i32, users: &State<Users>) -> Result<String, Error> {
     ///     users.delete(id).await?;
-    ///     Ok("The user has been deleted.")
+    ///     Ok("The user has been deleted.".to_string())
     /// }
     /// ```
     #[throws(Error)]
