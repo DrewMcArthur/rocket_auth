@@ -22,7 +22,13 @@ impl DBConnection for Client {
     async fn update_user(&self, user: &User) -> Result<()> {
         self.execute(
             sql::UPDATE_USER,
-            &[&user.email, &user.password, &user.is_admin],
+            &[
+                &user.id,
+                &user.email,
+                &user.username,
+                &user.password,
+                &user.is_admin,
+            ],
         )
         .await?;
         Ok(())
@@ -59,8 +65,9 @@ impl TryFrom<tokio_postgres::Row> for User {
         Ok(User {
             id: row.get(0),
             email: row.get(1),
-            password: row.get(2),
-            is_admin: row.get(3),
+            username: row.get(2),
+            password: row.get(3),
+            is_admin: row.get(4),
         })
     }
 }

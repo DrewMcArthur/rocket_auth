@@ -170,6 +170,7 @@ pub use error::Error;
 pub struct User {
     pub id: i32,
     email: String,
+    username: String,
     pub is_admin: bool,
     #[serde(skip_serializing)]
     password: String,

@@ -31,6 +31,7 @@ impl DBConnection for MySqlPool {
     async fn update_user(&self, user: &User) -> Result<()> {
         query(UPDATE_USER)
             .bind(&user.email)
+            .bind(&user.username)
             .bind(&user.password)
             .bind(user.is_admin)
             .bind(user.id)

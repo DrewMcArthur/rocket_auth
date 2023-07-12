@@ -21,8 +21,9 @@ impl<'a> TryFrom<&rusqlite::Row<'a>> for crate::User {
         Ok(User {
             id: row.get(0)?,
             email: row.get(1)?,
-            password: row.get(2)?,
-            is_admin: row.get(3)?,
+            username: row.get(2)?,
+            password: row.get(3)?,
+            is_admin: row.get(4)?,
         })
     }
 }
@@ -54,7 +55,13 @@ impl DBConnection for Mutex<rusqlite::Connection> {
         block_in_place(|| {
             conn.execute(
                 UPDATE_USER,
-                params![user.id, user.email, user.password, user.is_admin],
+                params![
+                    user.id,
+                    user.email,
+                    user.username,
+                    user.password,
+                    user.is_admin
+                ],
             )
         })?;
         Ok(())
@@ -142,6 +149,7 @@ impl DBConnection for Mutex<SqliteConnection> {
         query(UPDATE_USER)
             .bind(user.id)
             .bind(&user.email)
+            .bind(&user.username)
             .bind(&user.password)
             .bind(user.is_admin)
             .execute(&mut *db)
@@ -219,6 +227,7 @@ impl DBConnection for SqlitePool {
         query(UPDATE_USER)
             .bind(user.id)
             .bind(&user.email)
+            .bind(&user.username)
             .bind(&user.password)
             .bind(user.is_admin)
             .execute(self)

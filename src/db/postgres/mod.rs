@@ -32,6 +32,7 @@ impl DBConnection for PgPool {
         query(UPDATE_USER)
             .bind(user.id)
             .bind(&user.email)
+            .bind(&user.username)
             .bind(&user.password)
             .bind(user.is_admin)
             .execute(self)

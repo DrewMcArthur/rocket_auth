@@ -14,6 +14,7 @@ INSERT INTO users (email, username, password, is_admin) VALUES (?, ?, ?, ?);
 pub(crate) const UPDATE_USER: &str = "
 UPDATE users SET 
     email = ?,
+    username = ?,
     password = ?,
     is_admin = ?
 WHERE
