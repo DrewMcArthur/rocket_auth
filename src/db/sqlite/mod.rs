@@ -6,9 +6,9 @@ use sql::*;
 use tokio::sync::Mutex;
 
 #[cfg(feature = "rusqlite")]
-use rusqlite::Row;
+use rusqlite::params;
 #[cfg(feature = "rusqlite")]
-use rusqlite::*;
+use rusqlite::Row;
 #[cfg(feature = "rusqlite")]
 use std::convert::{TryFrom, TryInto};
 #[cfg(feature = "rusqlite")]
@@ -21,7 +21,7 @@ impl<'a> TryFrom<&rusqlite::Row<'a>> for crate::User {
     fn try_from(row: &Row) -> Result<User, rusqlite::Error> {
         Ok(User {
             id: row.get(0)?,
-            uuid: Uuid::from_bytes(row.get(1)?),
+            uuid: row.get(1)?,
             email: row.get(2)?,
             username: row.get(3)?,
             password: row.get(4)?,
@@ -49,10 +49,7 @@ impl DBConnection for Mutex<rusqlite::Connection> {
     ) -> Result<()> {
         let conn = self.lock().await;
         block_in_place(|| {
-            conn.execute(
-                INSERT_USER,
-                params![uuid.to_string(), email, username, hash, is_admin],
-            )
+            conn.execute(INSERT_USER, params![uuid, email, username, hash, is_admin])
         })?;
 
         Ok(())

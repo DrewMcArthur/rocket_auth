@@ -1,7 +1,7 @@
 pub(crate) const CREATE_TABLE: &str = "
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY,
-    uuid TEXT UNIQUE,
+    uuid BLOB CHECK(length(uuid) = 16),
     email TEXT UNIQUE,
     username TEXT UNIQUE,
     password TEXT NOT NULL,

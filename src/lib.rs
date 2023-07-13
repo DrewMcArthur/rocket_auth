@@ -91,7 +91,7 @@
 //!
 //! #[get("/see-user/<id>")]
 //! async fn see_user(uuid: Uuid, users: &State<Users>) -> String {
-//!     let user = users.get_by_uuid(id).await.unwrap();
+//!     let user = users.get_by_uuid(id).await.expect("error fetching user");
 //!     format!("{}", json!(user))
 //! }
 //! # fn main() {}

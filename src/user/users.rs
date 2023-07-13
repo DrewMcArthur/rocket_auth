@@ -163,7 +163,7 @@ impl Users {
             self.conn
                 .get_user_by_email(&email.to_lowercase())
                 .await
-                .map_err(|_| Error::EmailDoesNotExist(email.clone()))?
+                .map_err(|_e| Error::EmailDoesNotExist(email.clone()))?
         } else if login.username.is_some() {
             let username = login.username.as_ref().unwrap();
             self.conn
