@@ -5,6 +5,7 @@ use crate::prelude::*;
 use argon2::verify_encoded as verify;
 
 use rand::random;
+use uuid::Uuid;
 pub fn rand_string(size: usize) -> String {
     (0..)
         .map(|_| random::<char>())
@@ -16,7 +17,7 @@ pub fn rand_string(size: usize) -> String {
 
 impl Users {
     fn is_auth(&self, session: &Session) -> bool {
-        let option = self.sess.get(session.id);
+        let option = self.sess.get(session.uuid);
         if let Some(auth_key) = option {
             auth_key == session.auth_key
         } else {
@@ -30,7 +31,7 @@ impl Users {
         let user_pwd = &user.password;
         let form_pwd = &form.password.as_bytes();
         if verify(user_pwd, form_pwd)? {
-            self.set_auth_key(user.id)?
+            self.set_auth_key(user.uuid)?
         } else {
             throw!(Error::UnauthorizedError)
         }
@@ -39,21 +40,21 @@ impl Users {
     #[throws(Error)]
     fn logout(&self, session: &Session) {
         if self.is_auth(session) {
-            self.sess.remove(session.id)?;
+            self.sess.remove(session.uuid)?;
         }
     }
 
     #[throws(Error)]
-    fn set_auth_key_for(&self, user_id: i32, time: Duration) -> String {
+    fn set_auth_key_for(&self, uuid: Uuid, time: Duration) -> String {
         let key = rand_string(10);
-        self.sess.insert_for(user_id, key.clone(), time)?;
+        self.sess.insert_for(uuid, key.clone(), time)?;
         key
     }
 
     #[throws(Error)]
-    fn set_auth_key(&self, user_id: i32) -> String {
+    fn set_auth_key(&self, uuid: Uuid) -> String {
         let key = rand_string(15);
-        self.sess.insert(user_id, key.clone())?;
+        self.sess.insert(uuid, key.clone())?;
         key
     }
 
@@ -66,7 +67,7 @@ impl Users {
         let password = &form.password;
 
         let result = self
-            .create_user(email.as_deref(), username, password, false)
+            .create_user(Uuid::new_v4(), email.as_deref(), username, password, false)
             .await;
 
         match result {
@@ -91,7 +92,7 @@ impl Users {
         let user_pwd = &user.password;
         let form_pwd = &form.password.as_bytes();
         if verify(user_pwd, form_pwd)? {
-            self.set_auth_key_for(user.id, time)?
+            self.set_auth_key_for(user.uuid, time)?
         } else {
             throw!(Error::UnauthorizedError)
         }

@@ -2,20 +2,21 @@ use super::AuthKey;
 use super::SessionManager;
 use crate::prelude::*;
 use chashmap::CHashMap;
+use uuid::Uuid;
 
-impl SessionManager for CHashMap<i32, AuthKey> {
+impl SessionManager for CHashMap<Uuid, AuthKey> {
     #[throws(Error)]
-    fn insert(&self, id: i32, key: String) {
-        self.insert(id, key.into());
+    fn insert(&self, uuid: Uuid, key: String) {
+        self.insert(uuid, key.into());
     }
 
     #[throws(Error)]
-    fn remove(&self, id: i32) {
-        self.remove(&id);
+    fn remove(&self, uuid: Uuid) {
+        self.remove(&uuid);
     }
 
-    fn get(&self, id: i32) -> Option<String> {
-        let key = self.get(&id)?;
+    fn get(&self, uuid: Uuid) -> Option<String> {
+        let key = self.get(&uuid)?;
         Some(key.secret.clone())
     }
 
@@ -25,12 +26,12 @@ impl SessionManager for CHashMap<i32, AuthKey> {
     }
 
     #[throws(Error)]
-    fn insert_for(&self, id: i32, key: String, time: Duration) {
+    fn insert_for(&self, uuid: Uuid, key: String, time: Duration) {
         let key = AuthKey {
             expires: time.as_secs() as i64,
             secret: key,
         };
-        self.insert(id, key);
+        self.insert(uuid, key);
     }
 
     #[throws(Error)]

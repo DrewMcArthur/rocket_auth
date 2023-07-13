@@ -13,6 +13,7 @@ use rusqlite::*;
 use std::convert::{TryFrom, TryInto};
 #[cfg(feature = "rusqlite")]
 use tokio::task::block_in_place;
+use uuid::Uuid;
 
 #[cfg(feature = "rusqlite")]
 impl<'a> TryFrom<&rusqlite::Row<'a>> for crate::User {
@@ -20,10 +21,11 @@ impl<'a> TryFrom<&rusqlite::Row<'a>> for crate::User {
     fn try_from(row: &Row) -> Result<User, rusqlite::Error> {
         Ok(User {
             id: row.get(0)?,
-            email: row.get(1)?,
-            username: row.get(2)?,
-            password: row.get(3)?,
-            is_admin: row.get(4)?,
+            uuid: Uuid::from_bytes(row.get(1)?),
+            email: row.get(2)?,
+            username: row.get(3)?,
+            password: row.get(4)?,
+            is_admin: row.get(5)?,
         })
     }
 }
@@ -39,13 +41,19 @@ impl DBConnection for Mutex<rusqlite::Connection> {
 
     async fn create_user(
         &self,
+        uuid: Uuid,
         email: Option<&str>,
         username: Option<&str>,
         hash: &str,
         is_admin: bool,
     ) -> Result<()> {
         let conn = self.lock().await;
-        block_in_place(|| conn.execute(INSERT_USER, params![email, username, hash, is_admin]))?;
+        block_in_place(|| {
+            conn.execute(
+                INSERT_USER,
+                params![uuid.to_string(), email, username, hash, is_admin],
+            )
+        })?;
 
         Ok(())
     }
@@ -56,7 +64,7 @@ impl DBConnection for Mutex<rusqlite::Connection> {
             conn.execute(
                 UPDATE_USER,
                 params![
-                    user.id,
+                    user.uuid.to_string(),
                     user.email,
                     user.username,
                     user.password,
@@ -67,9 +75,9 @@ impl DBConnection for Mutex<rusqlite::Connection> {
         Ok(())
     }
 
-    async fn delete_user_by_id(&self, user_id: i32) -> Result<()> {
+    async fn delete_user_by_uuid(&self, uuid: Uuid) -> Result<()> {
         let conn = self.lock().await;
-        block_in_place(|| conn.execute(REMOVE_BY_ID, params![user_id]))?;
+        block_in_place(|| conn.execute(REMOVE_BY_UUID, params![uuid.to_string()]))?;
         Ok(())
     }
 
@@ -79,12 +87,12 @@ impl DBConnection for Mutex<rusqlite::Connection> {
         Ok(())
     }
 
-    async fn get_user_by_id(&self, user_id: i32) -> Result<User> {
+    async fn get_user_by_uuid(&self, uuid: Uuid) -> Result<User> {
         let conn = self.lock().await;
         let user = block_in_place(|| {
             conn.query_row(
-                SELECT_BY_ID, //
-                params![user_id],
+                SELECT_BY_UUID, //
+                params![uuid.to_string()],
                 |row| row.try_into(),
             )
         })?;
@@ -125,6 +133,7 @@ impl DBConnection for Mutex<SqliteConnection> {
     }
     async fn create_user(
         &self,
+        uuid: Uuid,
         email: Option<&str>,
         username: Option<&str>,
         hash: &str,
@@ -132,6 +141,7 @@ impl DBConnection for Mutex<SqliteConnection> {
     ) -> Result<()> {
         let mut db = self.lock().await;
         query(INSERT_USER)
+            .bind(uuid.to_string())
             .bind(email)
             .bind(username)
             .bind(hash)
@@ -143,7 +153,7 @@ impl DBConnection for Mutex<SqliteConnection> {
     async fn update_user(&self, user: &User) -> Result<()> {
         let mut db = self.lock().await;
         query(UPDATE_USER)
-            .bind(user.id)
+            .bind(user.uuid)
             .bind(&user.email)
             .bind(&user.username)
             .bind(&user.password)
@@ -152,9 +162,9 @@ impl DBConnection for Mutex<SqliteConnection> {
             .await?;
         Ok(())
     }
-    async fn delete_user_by_id(&self, user_id: i32) -> Result<()> {
-        query(REMOVE_BY_ID)
-            .bind(user_id)
+    async fn delete_user_by_uuid(&self, uuid: Uuid) -> Result<()> {
+        query(REMOVE_BY_UUID)
+            .bind(uuid)
             .execute(&mut *self.lock().await)
             .await?;
         Ok(())
@@ -166,11 +176,11 @@ impl DBConnection for Mutex<SqliteConnection> {
             .await?;
         Ok(())
     }
-    async fn get_user_by_id(&self, user_id: i32) -> Result<User> {
+    async fn get_user_by_uuid(&self, uuid: Uuid) -> Result<User> {
         let mut db = self.lock().await;
 
-        let user = query_as(SELECT_BY_ID)
-            .bind(user_id)
+        let user = query_as(SELECT_BY_UUID)
+            .bind(uuid)
             .fetch_one(&mut *db)
             .await?;
 
@@ -205,12 +215,14 @@ impl DBConnection for SqlitePool {
     }
     async fn create_user(
         &self,
+        uuid: Uuid,
         email: Option<&str>,
         username: Option<&str>,
         hash: &str,
         is_admin: bool,
     ) -> Result<()> {
         query(INSERT_USER)
+            .bind(uuid)
             .bind(email)
             .bind(username)
             .bind(hash)
@@ -221,7 +233,7 @@ impl DBConnection for SqlitePool {
     }
     async fn update_user(&self, user: &User) -> Result<()> {
         query(UPDATE_USER)
-            .bind(user.id)
+            .bind(user.uuid)
             .bind(&user.email)
             .bind(&user.username)
             .bind(&user.password)
@@ -230,9 +242,9 @@ impl DBConnection for SqlitePool {
             .await?;
         Ok(())
     }
-    async fn delete_user_by_id(&self, user_id: i32) -> Result<()> {
-        query(REMOVE_BY_ID) //
-            .bind(user_id)
+    async fn delete_user_by_uuid(&self, uuid: Uuid) -> Result<()> {
+        query(REMOVE_BY_UUID) //
+            .bind(uuid)
             .execute(self)
             .await?;
         Ok(())
@@ -244,9 +256,9 @@ impl DBConnection for SqlitePool {
             .await?;
         Ok(())
     }
-    async fn get_user_by_id(&self, user_id: i32) -> Result<User> {
-        let user = query_as(SELECT_BY_ID) //
-            .bind(user_id)
+    async fn get_user_by_uuid(&self, uuid: Uuid) -> Result<User> {
+        let user = query_as(SELECT_BY_UUID) //
+            .bind(uuid)
             .fetch_one(self)
             .await?;
         Ok(user)

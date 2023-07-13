@@ -5,6 +5,7 @@ use sql::*;
 use sqlx::postgres::PgPool;
 
 use sqlx::*;
+use uuid::Uuid;
 
 #[rocket::async_trait]
 impl DBConnection for PgPool {
@@ -14,12 +15,14 @@ impl DBConnection for PgPool {
     }
     async fn create_user(
         &self,
+        uuid: Uuid,
         email: Option<&str>,
         username: Option<&str>,
         hash: &str,
         is_admin: bool,
     ) -> Result<()> {
         query(INSERT_USER)
+            .bind(uuid)
             .bind(email)
             .bind(username)
             .bind(hash)
@@ -40,16 +43,16 @@ impl DBConnection for PgPool {
 
         Ok(())
     }
-    async fn delete_user_by_id(&self, user_id: i32) -> Result<()> {
-        query(REMOVE_BY_ID).bind(user_id).execute(self).await?;
+    async fn delete_user_by_uuid(&self, uuid: Uuid) -> Result<()> {
+        query(REMOVE_BY_UUID).bind(uuid).execute(self).await?;
         Ok(())
     }
     async fn delete_user_by_email(&self, email: &str) -> Result<()> {
         query(REMOVE_BY_EMAIL).bind(email).execute(self).await?;
         Ok(())
     }
-    async fn get_user_by_id(&self, user_id: i32) -> Result<User> {
-        let user = query_as(SELECT_BY_ID).bind(user_id).fetch_one(self).await?;
+    async fn get_user_by_uuid(&self, uuid: Uuid) -> Result<User> {
+        let user = query_as(SELECT_BY_UUID).bind(uuid).fetch_one(self).await?;
 
         Ok(user)
     }

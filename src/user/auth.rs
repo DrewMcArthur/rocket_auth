@@ -7,6 +7,7 @@ use rocket::Request;
 use rocket::State;
 use serde_json::json;
 use std::time::Duration;
+use uuid::Uuid;
 
 /// The [`Auth`] guard allows to log in, log out, sign up, modify, and delete the currently (un)authenticated user.
 /// For more information see [`Auth`].
@@ -92,7 +93,7 @@ impl<'a> Auth<'a> {
         let key = self.users.login(form).await?;
         let user = self.users.get_by_login(form).await?;
         let session = Session {
-            id: user.id,
+            uuid: user.uuid,
             email: user.email,
             auth_key: key,
             time_stamp: now(),
@@ -118,7 +119,7 @@ impl<'a> Auth<'a> {
         let user = self.users.get_by_login(form).await?;
 
         let session = Session {
-            id: user.id,
+            uuid: user.uuid,
             email: user.email,
             auth_key: key,
             time_stamp: now(),
@@ -201,8 +202,8 @@ impl<'a> Auth<'a> {
         if !self.is_auth() {
             return None;
         }
-        let id = self.session.as_ref()?.id;
-        if let Ok(user) = self.users.get_by_id(id).await {
+        let uuid: Uuid = self.session.as_ref()?.uuid;
+        if let Ok(user) = self.users.get_by_uuid(uuid).await {
             Some(user)
         } else {
             None
@@ -237,7 +238,7 @@ impl<'a> Auth<'a> {
     pub async fn delete(&self) {
         if self.is_auth() {
             let session = self.get_session()?;
-            self.users.delete(session.id).await?;
+            self.users.delete(session.uuid).await?;
             self.cookies.remove_private(Cookie::named("rocket_auth"));
         } else {
             throw!(Error::UnauthenticatedError)
@@ -257,7 +258,7 @@ impl<'a> Auth<'a> {
     pub async fn change_password(&self, password: &str) {
         if self.is_auth() {
             let session = self.get_session()?;
-            let mut user = self.users.get_by_id(session.id).await?;
+            let mut user = self.users.get_by_uuid(session.uuid).await?;
             user.set_password(password)?;
             self.users.modify(&user).await?;
         } else {
@@ -279,7 +280,7 @@ impl<'a> Auth<'a> {
                 throw!(Error::InvalidEmailAddressError)
             }
             let session = self.get_session()?;
-            let mut user = self.users.get_by_id(session.id).await?;
+            let mut user = self.users.get_by_uuid(session.uuid).await?;
             user.email = email.to_lowercase();
             self.users.modify(&user).await?;
         } else {
@@ -309,7 +310,7 @@ impl<'a> Auth<'a> {
     pub async fn compare_password(&self, password: &str) -> bool {
         if self.is_auth() {
             let session = self.get_session()?;
-            let user: User = self.users.get_by_id(session.id).await?;
+            let user: User = self.users.get_by_uuid(session.uuid).await?;
             user.compare_password(password)?
         } else {
             throw!(Error::UnauthorizedError)

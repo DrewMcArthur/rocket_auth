@@ -2,6 +2,7 @@ use crate::prelude::*;
 use rocket::http::{CookieJar, Status};
 use rocket::request::{FromRequest, Outcome, Request};
 use serde_json::from_str;
+use uuid::Uuid;
 
 /// The Session guard can be used to retrieve user session data.
 /// Unlike `User`, using session does not verify that the session data is
@@ -17,7 +18,7 @@ pub struct Session {
     /// It represents the Unix time in which the user logged in. It is measured in seconds.
     pub time_stamp: i64,
     /// The user id as it is stored on the database.
-    pub id: i32,
+    pub uuid: Uuid,
     /// The user email.
     pub email: String,
     /// A random authentication token key.

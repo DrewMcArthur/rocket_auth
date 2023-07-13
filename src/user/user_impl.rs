@@ -4,6 +4,7 @@ use super::rand_string;
 use crate::prelude::*;
 use rocket::http::Status;
 use rocket::request::{FromRequest, Outcome, Request};
+use uuid::Uuid;
 
 impl User {
     /// This method allows to reset the password of a user.
@@ -49,9 +50,12 @@ impl User {
     /// # use rocket_auth::{Error, User};
     /// #[get("/show-my-id")]
     /// fn show_my_id(user: User) -> String {
-    ///     format!("Your user_id is: {}", user.id())
+    ///     format!("Your uuid is: {}", user.id())
     /// }
     /// ```
+    pub fn uuid(&self) -> Uuid {
+        self.uuid
+    }
     pub fn id(&self) -> i32 {
         self.id
     }
@@ -62,7 +66,7 @@ impl User {
     /// # use rocket_auth::{Error, User};
     /// #[get("/show-my-email")]
     /// fn show_my_email(user: User) -> String {
-    ///     format!("Your user_id is: {}", user.email())
+    ///     format!("Your uuid is: {}", user.email())
     /// }
     /// ```
     pub fn email(&self) -> &str {

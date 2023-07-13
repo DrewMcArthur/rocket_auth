@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use super::rand_string;
 use crate::db::DBConnection;
 use crate::prelude::*;
@@ -211,15 +213,15 @@ impl Users {
     /// # use rocket_auth::{Error, Users};
     /// # #[get("/user-information/<email>")]
     /// # async fn user_information(email: String, users: &State<Users>) -> Result<(), Error> {
-    ///  let user = users.get_by_id(3).await?;
+    ///  let user = users.get_by_uuid(3).await?;
     ///  format!("{:?}", user);
     /// # Ok(())
     /// # }
     /// # fn main() {}
     /// ```
     #[throws(Error)]
-    pub async fn get_by_id(&self, user_id: i32) -> User {
-        self.conn.get_user_by_id(user_id).await?
+    pub async fn get_by_uuid(&self, uuid: Uuid) -> User {
+        self.conn.get_user_by_uuid(uuid).await?
     }
 
     /// Inserts a new user in the database. It will fail if the user already exists.
@@ -236,6 +238,7 @@ impl Users {
     #[throws(Error)]
     pub async fn create_user(
         &self,
+        uuid: Uuid,
         email: Option<&str>,
         username: Option<&str>,
         password: &str,
@@ -246,7 +249,7 @@ impl Users {
         let config = argon2::Config::default();
         let hash = argon2::hash_encoded(password, salt.as_bytes(), &config).unwrap();
         self.conn
-            .create_user(email, username, &hash, is_admin)
+            .create_user(uuid, email, username, &hash, is_admin)
             .await?;
     }
 
@@ -257,22 +260,22 @@ impl Users {
     /// # use rocket_auth::{Users, Error};
     ///
     /// #[get("/delete_user/<id>")]
-    /// async fn delete_user(id: i32, users: &State<Users>) -> Result<String, Error> {
+    /// async fn delete_user(uuid: Uuid, users: &State<Users>) -> Result<String, Error> {
     ///     users.delete(id).await?;
     ///     Ok("The user has been deleted.".to_string())
     /// }
     /// ```
     #[throws(Error)]
-    pub async fn delete(&self, id: i32) {
-        self.sess.remove(id)?;
-        self.conn.delete_user_by_id(id).await?;
+    pub async fn delete(&self, uuid: Uuid) {
+        self.sess.remove(uuid)?;
+        self.conn.delete_user_by_uuid(uuid).await?;
     }
 
     /// Modifies a user in the database.
     /// ```
     /// # use rocket_auth::{Users, Error};
     /// # async fn func(users: Users) -> Result<(), Error> {
-    /// let mut user = users.get_by_id(4).await?;
+    /// let mut user = users.get_by_uuid(4).await?;
     /// user.set_email("new@email.com");
     /// user.set_password("new password");
     /// users.modify(&user).await?;

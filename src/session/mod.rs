@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 use crate::prelude::*;
 use std::time::Duration;
 pub mod default;
@@ -6,10 +8,10 @@ pub mod default;
 pub mod redis;
 
 pub trait SessionManager: Send + Sync {
-    fn insert(&self, id: i32, key: String) -> Result<()>;
-    fn insert_for(&self, id: i32, key: String, time: Duration) -> Result<()>;
-    fn remove(&self, id: i32) -> Result<()>;
-    fn get(&self, id: i32) -> Option<String>;
+    fn insert(&self, uuid: Uuid, key: String) -> Result<()>;
+    fn insert_for(&self, uuid: Uuid, key: String, time: Duration) -> Result<()>;
+    fn remove(&self, uuid: Uuid) -> Result<()>;
+    fn get(&self, uuid: Uuid) -> Option<String>;
     fn clear_all(&self) -> Result<()>;
     fn clear_expired(&self) -> Result<()>;
 }

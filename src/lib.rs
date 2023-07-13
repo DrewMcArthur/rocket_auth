@@ -90,8 +90,8 @@
 //! use rocket_auth::Users;
 //!
 //! #[get("/see-user/<id>")]
-//! async fn see_user(id: i32, users: &State<Users>) -> String {
-//!     let user = users.get_by_id(id).await.unwrap();
+//! async fn see_user(uuid: Uuid, users: &State<Users>) -> String {
+//!     let user = users.get_by_uuid(id).await.unwrap();
 //!     format!("{}", json!(user))
 //! }
 //! # fn main() {}
@@ -146,6 +146,7 @@ mod user;
 mod tests;
 
 use std::fmt::Debug;
+use uuid::Uuid;
 
 pub use prelude::*;
 
@@ -168,7 +169,8 @@ pub use error::Error;
 #[cfg_attr(feature = "sqlx", derive(sqlx::FromRow))]
 #[derive(Serialize, Deserialize, PartialEq, Eq, Clone, Hash, PartialOrd, Ord)]
 pub struct User {
-    pub id: i32,
+    id: i32,
+    pub uuid: Uuid,
     email: String,
     username: String,
     pub is_admin: bool,

@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
 ";
 
 pub(crate) const INSERT_USER: &str = "
-INSERT INTO users (email, username, password, is_admin) VALUES (?, ?, ?, ?);
+INSERT INTO users (uuid, email, username, password, is_admin) VALUES (?, ?, ?, ?, ?);
 ";
 
 pub(crate) const UPDATE_USER: &str = "
@@ -19,11 +19,11 @@ UPDATE users SET
     password = ?,
     is_admin = ?
 WHERE
-    id = ?
+    uuid = ?
 ";
 
-pub(crate) const SELECT_BY_ID: &str = "
-SELECT * FROM users WHERE id = ?;
+pub(crate) const SELECT_BY_UUID: &str = "
+SELECT * FROM users WHERE uuid = ?;
 ";
 
 pub(crate) const SELECT_BY_EMAIL: &str = "
@@ -34,8 +34,8 @@ pub(crate) const SELECT_BY_USERNAME: &str = "
 SELECT * FROM users WHERE username = ?;
 ";
 
-pub(crate) const REMOVE_BY_ID: &str = "
-DELETE FROM users WHERE id = ?;
+pub(crate) const REMOVE_BY_UUID: &str = "
+DELETE FROM users WHERE uuid = ?;
 ";
 pub(crate) const REMOVE_BY_EMAIL: &str = "
 DELETE FROM users WHERE email = ?;

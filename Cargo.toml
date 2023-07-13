@@ -5,7 +5,7 @@ edition = "2018"
 license = "MIT or Apache-2.0"
 name = "rocket_auth"
 repository = "https://github.com/tvallotton/rocket_auth"
-version = "0.4.0"
+version = "0.5.0"
 
 categories = ["web-programming"]
 keywords = ["rocket", "users", "authentication", "auth", "session"]
@@ -22,6 +22,7 @@ sqlx-postgres = ["sqlx/postgres"]
 sqlx-sqlite = ["sqlx/sqlite"]
 
 [dependencies.rusqlite]
+features = ["uuid"]
 optional = true
 version = "^0.27.0"
 
@@ -37,9 +38,11 @@ regex = "1.5.6"
 rust-argon2 = "1.0.0"
 serde_json = "1.0.82"
 thiserror = "1.0.31"
+uuid = {version = "1.4.0", features = ["v4", "serde"]}
 validator = {version = "0.15.0", features = ["derive"]}
 
 [dependencies.sqlx]
+features = ["uuid"]
 optional = true
 version = "0.6.0"
 
@@ -52,8 +55,8 @@ features = ["derive"]
 version = "1.0.138"
 
 [dependencies.tokio-postgres]
-optional = true
-version = "0.7.6"
+features = ["with-uuid-0_8"]
+version = "0.7.8"
 
 [dependencies.redis]
 features = ["aio", "tokio-comp"]
@@ -88,8 +91,7 @@ features = [
   "sqlx-sqlite",
   "sqlx-postgres",
   "sqlx-mysql",
-  "redis",
-  "tokio-postgres",
+  "redis", # "tokio-postgres",
   "rusqlite",
 ]
 path = "../rocket_auth"

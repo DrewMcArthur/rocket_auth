@@ -1,10 +1,18 @@
+use uuid::Uuid;
+
 use crate::{Login, Users};
 
 #[tokio::test(flavor = "multi_thread")]
 async fn happy_path() {
     let users = Users::open_rusqlite(":memory:").unwrap();
     users
-        .create_user(Some("me@gmail.com"), Some("user"), "Str0ngPw!", true)
+        .create_user(
+            Uuid::new_v4(),
+            Some("me@gmail.com"),
+            Some("user"),
+            "Str0ngPw!",
+            true,
+        )
         .await
         .expect("error creating user");
 

@@ -2,6 +2,7 @@ use crate::prelude::*;
 mod sql;
 use std::convert::{TryFrom, TryInto};
 use tokio_postgres::Client;
+use uuid::Uuid;
 #[rocket::async_trait]
 impl DBConnection for Client {
     async fn init(&self) -> Result<()> {
@@ -10,13 +11,17 @@ impl DBConnection for Client {
     }
     async fn create_user(
         &self,
+        uuid: Uuid,
         email: Option<&str>,
         username: Option<&str>,
         hash: &str,
         is_admin: bool,
     ) -> Result<(), Error> {
-        self.execute(sql::INSERT_USER, &[&email, &username, &hash, &is_admin])
-            .await?;
+        self.execute(
+            sql::INSERT_USER,
+            &[&uuid.to_string(), &email, &username, &hash, &is_admin],
+        )
+        .await?;
         Ok(())
     }
     async fn update_user(&self, user: &User) -> Result<()> {
@@ -33,16 +38,19 @@ impl DBConnection for Client {
         .await?;
         Ok(())
     }
-    async fn delete_user_by_id(&self, user_id: i32) -> Result<()> {
-        self.execute(sql::REMOVE_BY_ID, &[&user_id]).await?;
+    async fn delete_user_by_uuid(&self, uuid: Uuid) -> Result<()> {
+        self.execute(sql::REMOVE_BY_UUID, &[&uuid.to_string()])
+            .await?;
         Ok(())
     }
     async fn delete_user_by_email(&self, email: &str) -> Result<()> {
         self.execute(sql::REMOVE_BY_EMAIL, &[&email]).await?;
         Ok(())
     }
-    async fn get_user_by_id(&self, user_id: i32) -> Result<User> {
-        let user = self.query_one(sql::SELECT_BY_ID, &[&user_id]).await?;
+    async fn get_user_by_uuid(&self, uuid: Uuid) -> Result<User> {
+        let user = self
+            .query_one(sql::SELECT_BY_UUID, &[&uuid.to_string()])
+            .await?;
         user.try_into()
     }
 
@@ -64,10 +72,11 @@ impl TryFrom<tokio_postgres::Row> for User {
     fn try_from(row: tokio_postgres::Row) -> Result<User> {
         Ok(User {
             id: row.get(0),
-            email: row.get(1),
-            username: row.get(2),
-            password: row.get(3),
-            is_admin: row.get(4),
+            uuid: Uuid::from_bytes(row.get(1)),
+            email: row.get(2),
+            username: row.get(3),
+            password: row.get(4),
+            is_admin: row.get(5),
         })
     }
 }
