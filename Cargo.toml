@@ -55,7 +55,8 @@ features = ["derive"]
 version = "1.0.138"
 
 [dependencies.tokio-postgres]
-features = ["with-uuid-0_8"]
+features = ["with-uuid-0_8", "with-uuid-1"]
+optional = true
 version = "0.7.8"
 
 [dependencies.redis]
@@ -66,9 +67,6 @@ version = "0.21.5"
 [dependencies.tokio]
 features = ["rt", "rt-multi-thread", "macros"]
 version = "1.19.2"
-
-[dev-dependencies]
-tokio-postgres = "0.7.6"
 
 [dev-dependencies.rocket]
 features = ["secrets", "json"]
@@ -91,7 +89,8 @@ features = [
   "sqlx-sqlite",
   "sqlx-postgres",
   "sqlx-mysql",
-  "redis", # "tokio-postgres",
+  "redis",
+  "tokio-postgres",
   "rusqlite",
 ]
 path = "../rocket_auth"

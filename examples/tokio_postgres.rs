@@ -55,9 +55,11 @@ async fn show_all_users(
 ) -> Result<Template, Error> {
     let users: Vec<User> = client
         .query("select * from users;", &[])
-        .await?
+        .await
+        .expect("error fetching users")
         .into_iter()
-        .flat_map(TryInto::try_into)
+        .map(TryInto::try_into)
+        .flatten()
         .collect();
 
     Ok(Template::render(

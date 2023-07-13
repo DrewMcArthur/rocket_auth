@@ -1,8 +1,11 @@
-use crate::prelude::*;
 mod sql;
+
 use std::convert::{TryFrom, TryInto};
 use tokio_postgres::Client;
 use uuid::Uuid;
+
+use crate::{DBConnection, Error, Result, User};
+
 #[rocket::async_trait]
 impl DBConnection for Client {
     async fn init(&self) -> Result<()> {
@@ -16,7 +19,7 @@ impl DBConnection for Client {
         username: Option<&str>,
         hash: &str,
         is_admin: bool,
-    ) -> Result<(), Error> {
+    ) -> Result<()> {
         self.execute(
             sql::INSERT_USER,
             &[&uuid.to_string(), &email, &username, &hash, &is_admin],
@@ -28,7 +31,7 @@ impl DBConnection for Client {
         self.execute(
             sql::UPDATE_USER,
             &[
-                &user.id,
+                &user.uuid,
                 &user.email,
                 &user.username,
                 &user.password,
@@ -72,7 +75,7 @@ impl TryFrom<tokio_postgres::Row> for User {
     fn try_from(row: tokio_postgres::Row) -> Result<User> {
         Ok(User {
             id: row.get(0),
-            uuid: Uuid::from_bytes(row.get(1)),
+            uuid: row.get(1),
             email: row.get(2),
             username: row.get(3),
             password: row.get(4),
